@@ -1,11 +1,17 @@
 import AnkiCardGenerator from "../components/ankiCardGenerator";
+import { FooterComponent } from "../components/footer";
 import { HeaderComponent } from "../components/header";
 
 export const HomePage = () => {
   return (
-    <div>
+    <div className="flex flex-col">
       <HeaderComponent />
-      <AnkiCardGenerator />
+      <div>
+        <AnkiCardGenerator />
+      </div>
+      <div>
+        <FooterComponent />
+      </div>
     </div>
   );
 };

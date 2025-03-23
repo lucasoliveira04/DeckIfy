@@ -1,95 +1,95 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { generateApkg } from "../services/generateApkg";
+import { FaTrash } from "react-icons/fa";
+import { UseDeck } from "../hook/useDeck";
 
 const AnkiCardGenerator = () => {
-  // Estado para armazenar os cartões e o nome do deck
-  const [cards, setCards] = useState([{ front: "", back: "" }]);
-  const [deckName, setDeckName] = useState("MeuDeck");
+  const { deckName, setDeckName, cards, addCard, removeCard, updateCard } =
+    UseDeck();
 
-  // Função para adicionar um novo cartão
-  const addCard = () => {
-    setCards([...cards, { front: "", back: "" }]);
-  };
-
-  // Função para remover um cartão
-  const removeCard = (index) => {
-    setCards(cards.filter((_, i) => i !== index));
-  };
-
-  // Função para atualizar os campos do cartão (Frente ou Verso)
-  const updateCard = (index, field, value) => {
-    const newCards = [...cards];
-    newCards[index][field] = value;
-    setCards(newCards);
-  };
-
-  // Função para exportar os dados e gerar o arquivo .apkg
   const handleFileUpload = async () => {
-    await generateApkg(deckName, cards); // Chama a função de API para gerar o arquivo
+    await generateApkg(deckName, cards);
   };
+
+  useEffect(() => {}, [deckName, cards]);
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-xl">
-      <h2 className="text-2xl font-bold text-center mb-4">
-        Gerador de Cartões Anki
-      </h2>
+    <div>
+      <div className="container mx-auto p-6 min-h-screen">
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Criador de Cartões Anki
+        </h1>
 
-      {/* Campo para digitar o nome do deck */}
-      <input
-        type="text"
-        placeholder="Nome do Deck"
-        value={deckName}
-        onChange={(e) => setDeckName(e.target.value)}
-        className="w-full p-2 mb-4 border rounded-lg"
-      />
+        <div className="flex gap-8">
+          <div className="w-2/3 p-6 bg-white shadow-lg rounded-lg">
+            <input
+              type="text"
+              value={deckName}
+              onChange={(e) => setDeckName(e.target.value)}
+              placeholder="Digite o nome do seu deck..."
+              className="w-full text-xl font-semibold p-3 border border-gray-300 rounded-md"
+            />
 
-      {/* Renderiza os cartões */}
-      {cards.map((card, index) => (
-        <div
-          key={index}
-          className="mb-4 p-6 bg-gray-100 rounded-lg shadow relative"
-        >
-          {/* Campo para digitar a frente do cartão */}
-          <input
-            type="text"
-            placeholder="Frente"
-            value={card.front}
-            onChange={(e) => updateCard(index, "front", e.target.value)}
-            className="w-full p-2 mb-2 border rounded-lg"
-          />
-          {/* Campo para digitar o verso do cartão */}
-          <input
-            type="text"
-            placeholder="Verso"
-            value={card.back}
-            onChange={(e) => updateCard(index, "back", e.target.value)}
-            className="w-full p-2 border rounded-lg"
-          />
-          {/* Botão para remover o cartão */}
-          <button
-            onClick={() => removeCard(index)}
-            className="absolute top-0 right-0 px-2 py-1 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition"
-          >
-            X
-          </button>
+            {cards.map((card, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 p-4 mt-4 rounded-lg shadow-sm"
+              >
+                <input
+                  type="text"
+                  value={card.front}
+                  onChange={(e) => updateCard(index, "front", e.target.value)}
+                  placeholder="Digite o conteúdo da frente do cartão..."
+                  className="w-full p-2 border rounded-md mb-2"
+                />
+                <textarea
+                  placeholder="Escreva o verso do cartão..."
+                  className="w-full h-[100px] resize-none bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+                  value={card.back}
+                  onChange={(e) => updateCard(index, "back", e.target.value)}
+                />
+                <button
+                  onClick={() => removeCard(index)}
+                  className="mt-2 text-red-500 hover:text-red-700 flex items-center"
+                >
+                  <FaTrash className="mr-1" /> Remover
+                </button>
+              </div>
+            ))}
+
+            <button
+              onClick={addCard}
+              className="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 rounded-lg"
+            >
+              Adicionar Novo Cartão
+            </button>
+          </div>
+
+          <div className="flex flex-col w-1/3 p-6 bg-white">
+            <h2 className="text-xl font-semibold mb-4">Pré-visualização</h2>
+            {cards.length === 0 ? (
+              <p className="text-gray-500">Nenhum cartão adicionado.</p>
+            ) : (
+              cards.map((card, index) => (
+                <div
+                  key={index}
+                  className="bg-white p-4 mb-2 rounded-md shadow"
+                >
+                  <p className="font-semibold">Frente: {card.front}</p>
+                  <p className="text-gray-600 break-words">
+                    Verso: {card.back}
+                  </p>
+                </div>
+              ))
+            )}
+            <button
+              onClick={handleFileUpload}
+              className="mt-4 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 rounded-lg"
+            >
+              Exportar Deck
+            </button>
+          </div>
         </div>
-      ))}
-
-      {/* Botões de adicionar e exportar */}
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={addCard}
-          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition"
-        >
-          Adicionar Cartão
-        </button>
-
-        <button
-          onClick={handleFileUpload}
-          className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
-        >
-          Exportar
-        </button>
       </div>
     </div>
   );
