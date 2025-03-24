@@ -2,13 +2,16 @@ import "./styles/fonts.css";
 import "./styles/globals.css";
 import { AppRoutes } from "./routes";
 import { DeckProvider } from "./context/DeckProvider";
+import { BrowserRouter } from "react-router";
 
 function App() {
   return (
     <>
-      <DeckProvider>
-        <AppRoutes />
-      </DeckProvider>
+      <BrowserRouter>
+        <DeckProvider>
+          <AppRoutes />
+        </DeckProvider>
+      </BrowserRouter>
     </>
   );
 }
