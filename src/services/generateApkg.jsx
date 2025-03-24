@@ -6,7 +6,7 @@ export const generateApkg = async (deckName, cards) => {
 
   try {
     const response = await axios.post(
-      "http://127.0.0.1:5000/convert",
+      "https://anki-convert-file-api.onrender.com/convert",
       jsonContent,
       {
         headers: {
