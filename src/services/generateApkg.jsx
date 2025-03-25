@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// Função para enviar dados e gerar o arquivo .apkg
-export const generateApkg = async (deckName, cards) => {
+export const generateApkg = async (deckName, cards, setProgress) => {
   const jsonContent = JSON.stringify({ deckName, cards }, null, 2);
 
   try {
@@ -10,25 +9,41 @@ export const generateApkg = async (deckName, cards) => {
       jsonContent,
       {
         headers: {
-          "Content-Type": "application/json", // Enviando os dados como JSON
+          "Content-Type": "application/json",
         },
-        responseType: "blob", // Esperando o arquivo como Blob
+        responseType: "blob",
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentCompleted);
+          }
+        },
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentage = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentage);
+          }
+        },
       }
     );
 
-    // Extrai o nome do arquivo da resposta
+    console.log("Resposta:", response);
+
     const contentDisposition = response.headers["content-disposition"];
     const fileName = contentDisposition
       ? contentDisposition.split("filename=")[1].replace(/"/g, "")
-      : `${deckName}.apkg`; // Usa o nome do deck se não houver nome no cabeçalho
+      : `${deckName}.apkg`;
 
-    // Cria um link para download do arquivo gerado
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", fileName); // Define o nome correto para o arquivo
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
-    link.click(); // Inicia o download
+    link.click();
   } catch (error) {
     console.error("Erro ao enviar arquivo:", error);
   }

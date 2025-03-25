@@ -22,8 +22,8 @@ export const DeckProvider = ({ children }) => {
   };
 
   // Função para adicionar um novo cartão
-  const addCard = () => {
-    const newCards = [...cards, { front: "", back: "" }];
+  const addCard = (front, back) => {
+    const newCards = [...cards, { front, back }];
     setCards(newCards);
     localStorage.setItem("cards", JSON.stringify(newCards));
   };

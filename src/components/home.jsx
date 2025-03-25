@@ -22,7 +22,7 @@ export const HomeComponent = () => {
             para
             <br />
             Estudar de forma mais eficiente <br />
-            <span className="text-yellow-500 animate-glow hover:text-yellow-400 hover:scale-110 transform transition-all duration-300">
+            <span className="text-yellow-500 animate-glow hover:text-yellow-400 hover:scale-110 transform transition-all duration-300 border-b-2">
               TUDO DE GRAÇA
             </span>
           </h2>
@@ -31,9 +31,9 @@ export const HomeComponent = () => {
         <div className="flex h-[70%] w-full justify-center items-center">
           <Link
             to={"/createdDeck"}
-            className="bg-gradient-to-r from-violet-800 to-indigo-600 rounded-3xl w-[300px] h-[80px] text-[34px] font-bold uppercase text-white flex items-center justify-center transform transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-yellow-500 hover:to-yellow-400"
+            className="bg-gradient-to-r from-violet-800 to-indigo-600 rounded-3xl w-[300px] h-[80px] text-[34px] font-bold uppercase text-white flex items-center justify-center transform transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-indigo-600 hover:to-violet-800"
           >
-            Começar
+            Criar
           </Link>
         </div>
       </div>

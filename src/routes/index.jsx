@@ -5,14 +5,14 @@ import { UseDeck } from "../hook/useDeck";
 import { useEffect } from "react";
 
 export const AppRoutes = () => {
-  const { cards } = UseDeck();
-  const navigate = useNavigate();
+  // const { cards } = UseDeck();
+  // const navigate = useNavigate();
 
-  useEffect(() => {
-    if (cards.length > 0) {
-      navigate("/createdDeck");
-    }
-  }, [cards, navigate]);
+  // useEffect(() => {
+  //   if (cards.length > 0) {
+  //     navigate("/createdDeck");
+  //   }
+  // }, [cards, navigate]);
 
   return (
     <Routes>
