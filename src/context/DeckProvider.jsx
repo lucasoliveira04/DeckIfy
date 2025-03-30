@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 
-// Criação do contexto
 export const DeckContext = createContext();
 
 export const useDeck = () => {
@@ -26,6 +25,25 @@ export const DeckProvider = ({ children }) => {
     const newCards = [...cards, { front, back }];
     setCards(newCards);
     localStorage.setItem("cards", JSON.stringify(newCards));
+  };
+
+  // Função para adicionar múltiplos cartões de uma vez
+  const addMultipleCards = (context, quantity) => {
+    const newCards = [];
+
+    for (let i = 0; i < quantity; i++) {
+      newCards.push({ front: `Cartão #${i + 1}`, back: context, isIA: true });
+    }
+
+    const updatedCards = [...cards, ...newCards];
+    setCards(updatedCards);
+    localStorage.setItem("cards", JSON.stringify(updatedCards));
+  };
+
+  // Removendo todos os cartões
+  const removeAllCard = () => {
+    setCards([]);
+    localStorage.setItem("cards", JSON.stringify([]));
   };
 
   // Função para remover um cartão
@@ -57,8 +75,10 @@ export const DeckProvider = ({ children }) => {
         setDeckName: updateDeckName,
         cards,
         addCard,
+        addMultipleCards,
         removeCard,
         updateCard,
+        removeAllCard,
       }}
     >
       {children}
