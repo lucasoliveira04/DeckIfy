@@ -2,38 +2,36 @@ import { Link } from "react-router-dom";
 
 export const HomeComponent = () => {
   return (
-    <div className="flex w-full h-screen bg-gray-900 font-inter">
+    <div className="flex w-full h-screen bg-gray-50 font-inter">
       <div className="flex flex-col justify-evenly w-full px-10 items-center gap-y-10">
-        <div className="relative bottom-2 flex flex-col h-[25%] w-full justify-end pb-6 pl-6 items-start bg-gradient-to-r from-violet-600 to-blue-600 rounded-b-3xl border border-blue-500">
-          <h1 className="text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300 transform -rotate-2">
+        {/* Header com branding */}
+        <div className="relative flex flex-col h-[25%] w-full justify-end pb-6 pl-6 items-start bg-gradient-to-r from-green-500 to-green-700 rounded-b-3xl border border-green-600 shadow-lg">
+          <h1 className="text-7xl font-bold text-white tracking-wide">
             Dack
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-yellow-500">
-              Ify
-            </span>
+            <span className="text-green-200">Ify</span>
           </h1>
         </div>
 
+        {/* Texto principal */}
         <div className="flex flex-col justify-center h-[80%]">
-          <h2 className="text-[100px] text-white font-anton font-bold text-center leading-tight">
+          <h2 className="text-[60px] text-gray-900 font-semibold text-center leading-tight">
             Crie FlashCards com{" "}
-            <span className="text-yellow-400 animate-glow hover:text-yellow-500 hover:scale-110 transform transition-all duration-300">
-              IA
-            </span>{" "}
-            para
+            <span className="text-green-600 font-bold">IA</span> para
             <br />
             Estudar de forma mais eficiente <br />
-            <span className="text-yellow-500 animate-glow hover:text-yellow-400 hover:scale-110 transform transition-all duration-300 border-b-2">
-              TUDO DE GRAÇA
+            <span className="text-green-700 border-b-4 border-green-500">
+              100% Gratuito
             </span>
           </h2>
         </div>
 
+        {/* Botão de ação */}
         <div className="flex h-[70%] w-full justify-center items-center">
           <Link
             to={"/createdDeck"}
-            className="bg-gradient-to-r from-violet-800 to-indigo-600 rounded-3xl w-[300px] h-[80px] text-[34px] font-bold uppercase text-white flex items-center justify-center transform transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-indigo-600 hover:to-violet-800"
+            className="bg-green-600 hover:bg-green-700 rounded-lg w-[280px] h-[70px] text-[28px] font-semibold uppercase text-white flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg"
           >
-            Criar
+            Comecar
           </Link>
         </div>
       </div>

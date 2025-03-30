@@ -28,12 +28,12 @@ export const DeckProvider = ({ children }) => {
   };
 
   // Função para adicionar múltiplos cartões de uma vez
-  const addMultipleCards = (context, quantity) => {
-    const newCards = [];
-
-    for (let i = 0; i < quantity; i++) {
-      newCards.push({ front: `Cartão #${i + 1}`, back: context, isIA: true });
-    }
+  const addMultipleCards = (flashcards) => {
+    const newCards = flashcards.map((flashcard) => ({
+      front: flashcard.frente,
+      back: flashcard.verso,
+      isIA: true,
+    }));
 
     const updatedCards = [...cards, ...newCards];
     setCards(updatedCards);
