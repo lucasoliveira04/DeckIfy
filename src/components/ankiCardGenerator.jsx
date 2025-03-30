@@ -1,20 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { generateApkg } from "../services/generateApkg";
 import { UseDeck } from "../hook/useDeck";
 import { FaTrash } from "react-icons/fa6";
 import LoadingModal from "./loadingPage";
+import { AlertMessage } from "./alertMessage";
+import ModalIA from "./modal-IA";
 
 const AnkiCardGenerator = () => {
-  const { deckName, setDeckName, cards, addCard, removeCard } = UseDeck();
+  const { deckName, setDeckName, cards, addCard, removeCard, removeAllCard } =
+    UseDeck();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [frontInput, setFrontInput] = useState("");
   const [backInput, setBackInput] = useState("");
+  const [alert, setAlert] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => {
+        setAlert(null);
+      }, 3000);
+      return () => clearInterval(timer);
+    }
+  }, [alert]);
 
   const handleFileUpload = async () => {
+    if (cards.length === 0) {
+      setAlert({
+        message: "Crie no mínimo 1 cartão.",
+        typeMessage: "error",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await generateApkg(deckName, cards, setProgress);
+      setAlert({
+        message: `Cartão criado com sucesso!`,
+        typeMessage: "success",
+      });
     } finally {
       setLoading(false);
     }
@@ -31,14 +61,47 @@ const AnkiCardGenerator = () => {
     setBackInput("");
   };
 
+  const filteredCards = cards.filter(
+    (card) =>
+      card.front.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.back.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleClearCards = () => {
+    console.log("A");
+    removeAllCard();
+  };
+
+  const highlightText = (text, query) => {
+    if (!query) return text;
+
+    const parts = text.split(new RegExp(`(${query})`, "gi"));
+    return parts.map((part, index) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={index} className="bg-yellow-300">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {loading && <LoadingModal progress={progress} />}
 
+      {alert && (
+        <AlertMessage message={alert.message} typeMessage={alert.typeMessage} />
+      )}
+
       <div className="flex p-6 bg-white rounded-lg shadow-md h-screen border">
         <div className="flex flex-col gap-6 w-[50%] border p-5">
           <div>
-            <button className="h-[50px] w-[200px] cursor-pointer border bg-violet-600 m-2 rounded-2xl text-2xl uppercase font-semibold text-white hover:bg-violet-700 transition-all duration-300">
+            <button
+              onClick={openModal}
+              className="h-[50px] w-[200px] cursor-pointer border bg-violet-600 m-2 rounded-2xl text-2xl uppercase font-semibold text-white hover:bg-violet-700 transition-all duration-300"
+            >
               Usar IA 🤖
             </button>
           </div>
@@ -80,54 +143,93 @@ const AnkiCardGenerator = () => {
                 placeholder="Coloque a resposta aqui..."
               ></textarea>
             </div>
+
+            <div className="flex justify-center p-6">
+              <button
+                onClick={handleAddCard}
+                className="h-[50px] w-[300px] cursor-pointer border bg-violet-600 m-2 rounded-2xl text-2xl uppercase font-semibold text-white hover:bg-violet-700 transition-all duration-300"
+              >
+                Adicionar Cartão
+              </button>
+
+              <button
+                onClick={handleFileUpload}
+                className="h-[50px] w-[200px] cursor-pointer border bg-violet-600 m-2 rounded-2xl text-2xl uppercase font-semibold text-white hover:bg-violet-700 transition-all duration-300"
+              >
+                {loading ? "Gerando..." : "Gerar Anki"}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col w-[50%] border p-5">
-          <h2 className="text-xl font-semibold mb-4">Pré-visualização</h2>
-          {cards.length === 0 ? (
+        <div className="flex flex-col w-full border p-5 max-h-screen overflow-y-auto">
+          <div className="flex w-full justify-between items-center p-4 bg-white rounded-md shadow-md mb-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-0">
+                Pré-visualização
+              </h2>
+              <button
+                onClick={handleClearCards}
+                className="text-sm text-red-600 hover:text-red-700 focus:outline-none transition-all duration-300"
+              >
+                Apagar todos os Cards
+              </button>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="text"
+                placeholder="Filtrar cartão"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-[250px] py-2 px-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-violet-500 focus:outline-none transition-all duration-300"
+              />
+            </div>
+          </div>
+
+          {filteredCards.length === 0 ? (
             <p className="text-gray-500">Nenhum cartão adicionado.</p>
           ) : (
-            cards.map((card, index) => (
-              <div
-                key={index}
-                className="bg-white p-4 mb-2 rounded-md shadow w-[400px] cursor-pointer hover:bg-gray-100 transition-all"
-              >
-                <div className="flex justify-end">
-                  <FaTrash
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeCard(index);
-                    }}
-                    className="cursor-pointer text-red-500 hover:text-red-600 transition-all duration-300"
-                  />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {filteredCards.map((card, index) => (
+                <div
+                  key={index}
+                  className={`p-4 mb-2 rounded-md shadow w-full cursor-pointer hover:bg-gray-100 transition-all ${
+                    card.isIA
+                      ? "bg-gradient-to-r from-white via-violet-300 to-violet-600"
+                      : "bg-white"
+                  }`}
+                >
+                  <div className="flex justify-end">
+                    <FaTrash
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeCard(index);
+                      }}
+                      className="cursor-pointer text-red-500 hover:text-red-600 transition-all duration-300"
+                    />
+                  </div>
 
-                <p className="font-semibold break-words">
-                  Frente: {card.front}
-                </p>
-                <p className="text-gray-600 break-words">Verso: {card.back}</p>
-              </div>
-            ))
+                  <p className="font-semibold break-words select-text hover:bg-gray-200 p-1 rounded-md">
+                    Frente: {highlightText(card.front, searchQuery)}
+                  </p>
+                  <p className="text-gray-600 break-words select-text hover:bg-gray-200 p-1 rounded-md">
+                    Verso: {highlightText(card.back, searchQuery)}
+                  </p>
+
+                  {card.isIA && (
+                    <span className="text-green-500 text-sm font-semibold">
+                      Criado com IA
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
 
-      <div className="flex justify-center p-6 bg-blue-100">
-        <button
-          onClick={handleAddCard}
-          className="h-[50px] w-[300px] cursor-pointer border bg-violet-600 m-2 rounded-2xl text-2xl uppercase font-semibold text-white hover:bg-violet-700 transition-all duration-300"
-        >
-          Adicionar Cartão
-        </button>
-
-        <button
-          onClick={handleFileUpload}
-          className="h-[50px] w-[200px] cursor-pointer border bg-violet-600 m-2 rounded-2xl text-2xl uppercase font-semibold text-white hover:bg-violet-700 transition-all duration-300"
-        >
-          {loading ? "Gerando..." : "Gerar Anki"}
-        </button>
-      </div>
+      <ModalIA isOpen={isModalOpen} closeModal={closeModal} />
     </div>
   );
 };
