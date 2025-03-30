@@ -194,11 +194,7 @@ const AnkiCardGenerator = () => {
               {filteredCards.map((card, index) => (
                 <div
                   key={index}
-                  className={`p-4 mb-2 rounded-md shadow w-full cursor-pointer hover:bg-gray-100 transition-all ${
-                    card.isIA
-                      ? "bg-gradient-to-r from-white via-violet-300 to-violet-600"
-                      : "bg-white"
-                  }`}
+                  className={`p-4 mb-2 rounded-md shadow w-full cursor-pointer hover:bg-gray-100 transition-all`}
                 >
                   <div className="flex justify-end">
                     <FaTrash
@@ -218,9 +214,14 @@ const AnkiCardGenerator = () => {
                   </p>
 
                   {card.isIA && (
-                    <span className="text-green-500 text-sm font-semibold">
-                      Criado com IA
-                    </span>
+                    <div className="flex justify-end">
+                      <span
+                        className="text-gray-600 text-xl ml-2"
+                        title="Gerado com IA"
+                      >
+                        🤖
+                      </span>
+                    </div>
                   )}
                 </div>
               ))}
