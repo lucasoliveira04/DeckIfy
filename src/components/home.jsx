@@ -7,7 +7,7 @@ export const HomeComponent = () => {
         {/* Cabeçalho */}
         <div className="relative flex flex-col h-[20%] w-full justify-end pb-4 pl-4 items-start bg-gradient-to-r from-green-500 to-green-700 rounded-b-3xl border border-green-600 shadow-lg">
           <h1 className="text-5xl md:text-7xl font-bold text-white tracking-wide">
-            Dack<span className="text-green-200">Ify</span>
+            Deck<span className="text-green-200">Ify</span>
           </h1>
         </div>
 
