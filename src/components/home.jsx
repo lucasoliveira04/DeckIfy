@@ -4,7 +4,6 @@ export const HomeComponent = () => {
   return (
     <div className="flex w-full h-screen bg-gray-50 font-inter">
       <div className="flex flex-col justify-evenly w-full px-10 items-center gap-y-10">
-        {/* Header com branding */}
         <div className="relative flex flex-col h-[25%] w-full justify-end pb-6 pl-6 items-start bg-gradient-to-r from-green-500 to-green-700 rounded-b-3xl border border-green-600 shadow-lg">
           <h1 className="text-7xl font-bold text-white tracking-wide">
             Dack
