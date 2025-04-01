@@ -20,21 +20,13 @@ const AnkiCardCarousel = ({ filteredCards }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="flex flex-col items-center justify-center w-full">
       {filteredCards.length === 0 ? (
         <p className="text-gray-500">Nenhum cartão adicionado.</p>
       ) : (
-        <div className="flex justify-center items-center">
-          {/* Botão de navegação anterior */}
-          <button
-            onClick={prevCard}
-            className="absolute left-0 p-4 bg-gray-800 border text-white rounded-full hover:bg-gray-700 transition-all duration-300"
-          >
-            &lt;
-          </button>
-
-          {/* Exibindo apenas o cartão atual */}
-          <div className="w-80 p-4  bg-white rounded-md shadow-md">
+        <div className="flex flex-col items-center w-full max-w-full">
+          {/* Card atual */}
+          <div className="relative w-full p-4 bg-white rounded-md shadow-md">
             <div className="flex justify-between items-center">
               <FaTrash
                 onClick={(e) => {
@@ -64,13 +56,22 @@ const AnkiCardCarousel = ({ filteredCards }) => {
             )}
           </div>
 
-          {/* Botão de navegação próximo */}
-          <button
-            onClick={nextCard}
-            className="absolute right-0 p-4 bg-gray-800 border text-white rounded-full hover:bg-gray-700 transition-all duration-300"
-          >
-            &gt;
-          </button>
+          {/* Botões de navegação */}
+          <div className="flex justify-between w-full max-w-full mt-4">
+            <button
+              onClick={prevCard}
+              className="p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-all duration-300 cursor-pointer"
+            >
+              &lt;
+            </button>
+
+            <button
+              onClick={nextCard}
+              className="p-3 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-all duration-300 cursor-pointer"
+            >
+              &gt;
+            </button>
+          </div>
         </div>
       )}
     </div>

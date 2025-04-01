@@ -98,17 +98,17 @@ export const AnkiCardGeneratorMobile = () => {
           </div>
         </div>
 
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col justify-center place-items-center space-y-4 ">
           <Button
             onClick={handleAddCard}
-            className="w-full py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition-all duration-300"
+            className="w-[50%] py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition-all duration-300 cursor-pointer"
           >
             Adicionar Cartão
           </Button>
 
           <Button
             onClick={handleFileUpload}
-            className="w-full py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition-all duration-300"
+            className="w-[50%] py-3 bg-blue-600 rounded-xl text-white font-semibold hover:bg-blue-700 transition-all duration-300 cursor-pointer"
           >
             {loading ? "Gerando..." : "Gerar Anki"}
           </Button>

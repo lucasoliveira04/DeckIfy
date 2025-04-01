@@ -1,8 +1,7 @@
-import { Route, Routes, useNavigate } from "react-router-dom";
-import { HomePage } from "../pages/Home";
+import { Route, Routes } from "react-router-dom";
+
 import { CreatedDackPage } from "../pages/CreatedDackPage";
-import { UseDeck } from "../hook/useDeck";
-import { useEffect } from "react";
+import { HomePage } from "./Home";
 
 export const AppRoutes = () => {
   // const { cards } = UseDeck();
@@ -18,7 +17,7 @@ export const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/createdDeck" element={<CreatedDackPage />} />
-      <Route path="*" element={<h1>Not Found</h1>} />
+      <Route path="*" element={<HomePage />} />
     </Routes>
   );
 };
