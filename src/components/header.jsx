@@ -7,12 +7,12 @@ export const HeaderComponent = () => {
 
   return (
     <div>
-      <header className="w-full bg-gray-800 text-white p-2">
-        <div className="flex space-x-4">
-          <div className="flex items-center justify-center w-full">
+      <header className="w-full bg-gray-800 text-white p-4">
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-4">
+          <div className="flex flex-col md:flex-row md:space-x-4 w-full md:w-auto items-center">
             <div className="flex-1">
               <p>
-                Nome do Dack:
+                Nome do Deck:
                 <span> {deckName}</span>
               </p>
             </div>
@@ -30,12 +30,12 @@ export const HeaderComponent = () => {
               <FaGithub className="text-xl hover:opacity-50" />
             </Link>
             <Link
-              to={"https://www.instagram.com/lucasoliveira.04_/"}
+              to="https://www.instagram.com/lucasoliveira.04_/"
               target="_blank"
             >
               <FaInstagram className="text-xl hover:opacity-50" />
             </Link>
-            <Link to={"https://x.com/lucasoli04"} target="_blank">
+            <Link to="https://x.com/lucasoli04" target="_blank">
               <FaTwitter className="text-xl hover:opacity-50" />
             </Link>
           </div>
