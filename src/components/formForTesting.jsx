@@ -1,6 +1,7 @@
 import { FaArrowLeft } from "react-icons/fa";
 import { useAnkiCardGenerator } from "../hook/useAnkiCardGenerator";
 import AnkiCardCarousel from "./AnkiCardCarousel";
+import LoadingModal from "./loadingPage";
 
 export const FormForTestingNotIA = ({ setActiveForm }) => {
   const {
@@ -24,7 +25,7 @@ export const FormForTestingNotIA = ({ setActiveForm }) => {
     setSearchQuery,
   } = useAnkiCardGenerator();
 
-  const isGenerateButtonDisabled = !deckName || filteredCards.length === 0;
+  const isGenerateButtonDisabled = filteredCards.length === 0;
   const isAddCardButtonDisabled = !frontInput || !backInput;
   const disabledClass = "opacity-50 cursor-not-allowed";
 
@@ -33,12 +34,13 @@ export const FormForTestingNotIA = ({ setActiveForm }) => {
   };
 
   return (
-    <div className="flex flex-col h-full items-center px-14">
-      <div className="flex w-full justify-between items-center">
+    <div className="flex flex-col items-center px-4 sm:px-10 md:px-14">
+      {loading && <LoadingModal progress={progress} />}
+      <div className="flex w-full justify-between items-center mb-4">
         <button>
           <FaArrowLeft onClick={handleArrowClick} />
         </button>
-        <h2 className="text-3xl font-semibold mb-8 pr-20 mx-auto pt-2">
+        <h2 className="text-3xl font-semibold mb-4 pr-20 mx-auto pt-2 text-center">
           Nome do Deck: {deckName}
         </h2>
       </div>
@@ -48,7 +50,7 @@ export const FormForTestingNotIA = ({ setActiveForm }) => {
           type="text"
           placeholder="Nome do Deck Aqui"
           onChange={(e) => setDeckName(e.target.value)}
-          className="w-[50%] h-12 text-center self-center font-inter placeholder:text-gray-400 placeholder:shadow-3d border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition-all duration-300"
+          className="w-full sm:w-[50%] h-12 text-center self-center font-inter placeholder:text-gray-400 placeholder:shadow-3d border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition-all duration-300"
         />
 
         <div className="space-y-4">
@@ -78,18 +80,18 @@ export const FormForTestingNotIA = ({ setActiveForm }) => {
         </div>
       </div>
 
-      <div className="flex space-x-10 mt-5">
+      <div className="flex flex-wrap gap-4 mt-5 justify-center w-full max-w-screen-sm mb-5">
         <button
-          className={`px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
+          className={`w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
             isGenerateButtonDisabled ? disabledClass : ""
           }`}
           onClick={handleFileUpload}
           disabled={isGenerateButtonDisabled}
         >
-          Gerar Deck
+          {loading ? "Gerando..." : "Gerar Deck"}
         </button>
         <button
-          className={`px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 ${
+          className={`w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 ${
             isAddCardButtonDisabled ? disabledClass : ""
           }`}
           onClick={handleAddCard}
@@ -99,11 +101,12 @@ export const FormForTestingNotIA = ({ setActiveForm }) => {
         </button>
         <button
           onClick={openModal}
-          className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300"
+          className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300"
         >
           Pré visualização
         </button>
       </div>
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-10 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
