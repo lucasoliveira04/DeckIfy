@@ -38,6 +38,7 @@ const ModalIA = ({ isOpen, closeModal }) => {
     value = Math.min(maxCards, value);
     setQuantityCards(value);
   };
+
   const handleGenerate = async () => {
     if (!contexto.trim()) {
       alert("Por favor, insira um contexto para gerar os cartões.");
