@@ -9,9 +9,10 @@ export default {
         inter: ["'Inter'", "sans-serif"],
         boldonse: ["'Boldonse'", "sans-serif"],
         poppins: ["'Poppins'", "sans-serif"],
+        permanent: ["'Permanent'", "sans-serif"],
       },
       screens: {
-        xs: "300px",
+        xs: { max: "1230px" },
       },
       transitionProperty: {
         width: "width",
