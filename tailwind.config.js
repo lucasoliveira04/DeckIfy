@@ -1,42 +1,34 @@
-export default {  
-  content: ['./index.html', './src/**/*,{js,ts,jsx,tsx}'],
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      boxShadow: {
-        glow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6)',
-      },
-      animation: {
-        glow: 'glow 1.5s ease-in-out infinite',
-        shake: 'shake 0.3s ease-in-out infinite',
-        typing: 'typing 1.5s infinite alternate',
-      },
-      keyframes: { 
-        gradient: {
-          "0%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-          "100%": { backgroundPosition: "0% 50%" },
-        },
-        glow: {
-          '0%': { textShadow: '0 0 5px rgba(255, 255, 255, 0.8)' },
-          '50%': { textShadow: '0 0 20px rgba(255, 255, 255, 1)' },
-          '100%': { textShadow: '0 0 5px rgba(255, 255, 255, 0.8)' },
-        },
-        shake: {
-          '0%, 100%': { transform: 'translateX(0)' },
-          '25%': { transform: 'translateX(-3px)' },
-          '50%': { transform: 'translateX(3px)' },
-          '75%': { transform: 'translateX(-3px)' },
-        },
-        typing: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-      },
       fontFamily: {
-        winky: ['Winky Sans', 'sans-serif'],
-        anton: ['Anton', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
-        boldonse: ['Boldonse', 'sans-serif'],
+        winky: ["'Winky Sans'", "sans-serif"],
+        anton: ["'Anton'", "sans-serif"],
+        inter: ["'Inter'", "sans-serif"],
+        boldonse: ["'Boldonse'", "sans-serif"],
+        poppins: ["'Poppins'", "sans-serif"],
+      },
+      screens: {
+        xs: "300px",
+      },
+      transitionProperty: {
+        width: "width",
+        height: "height",
+        spacing: "margin, padding",
+        opacity: "opacity",
+        transform: "transform",
+      },
+      transitionDuration: {
+        0: "0ms",
+        200: "200ms",
+        500: "500ms",
+        1000: "1000ms",
+      },
+      transitionTimingFunction: {
+        "in-out": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "ease-smooth": "cubic-bezier(0.68, -0.55, 0.27, 1.55)",
       },
     },
   },
