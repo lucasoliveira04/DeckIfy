@@ -1,8 +1,70 @@
+// FormForTestingNotIA.jsx
+
 import { FaArrowLeft } from "react-icons/fa";
 import { useAnkiCardGenerator } from "../hook/useAnkiCardGenerator";
 import AnkiCardCarousel from "./AnkiCardCarousel";
 import LoadingModal from "./loadingPage";
 
+/* ─── shared primitives (local) ─────────────────────────────────── */
+const Label = ({ children }) => (
+  <label className="text-xs font-semibold tracking-widest uppercase text-slate-400">
+    {children}
+  </label>
+);
+
+const Textarea = ({ value, onChange, placeholder, rows = 6 }) => (
+  <textarea
+    rows={rows}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    className="
+      w-full resize-none rounded-xl border border-slate-700 bg-slate-800/60
+      px-4 py-3 text-sm text-slate-100 placeholder-slate-500
+      focus:outline-none focus:ring-2 focus:ring-indigo-500
+      transition-all duration-200
+    "
+  />
+);
+
+const Btn = ({ onClick, disabled, variant = "primary", children }) => {
+  const base =
+    "px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-95 cursor-pointer";
+  const variants = {
+    primary:
+      "bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed",
+    ghost:
+      "border border-slate-700 text-slate-300 hover:border-indigo-500 hover:text-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed",
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`${base} ${variants[variant]}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+const PreviewModal = ({ filteredCards, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="relative w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <h2 className="mb-4 text-center text-lg font-bold text-slate-100">
+        Pré-visualização
+      </h2>
+      <AnkiCardCarousel filteredCards={filteredCards} />
+      <button
+        onClick={onClose}
+        className="mt-4 w-full rounded-xl bg-red-600/80 py-2.5 text-sm font-semibold text-white hover:bg-red-500 transition-all duration-200"
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+);
+
+/* ─── component ─────────────────────────────────────────────────── */
 export const FormForTestingNotIA = ({ setActiveForm }) => {
   const {
     deckName,
@@ -14,117 +76,90 @@ export const FormForTestingNotIA = ({ setActiveForm }) => {
     filteredCards,
     handleFileUpload,
     handleAddCard,
-    removeAllCard,
     loading,
     progress,
-    alert,
     isModalOpen,
     openModal,
     closeModal,
-    searchQuery,
-    setSearchQuery,
   } = useAnkiCardGenerator();
 
-  const isGenerateButtonDisabled = filteredCards.length === 0;
-  const isAddCardButtonDisabled = !frontInput || !backInput;
-  const disabledClass = "opacity-50 cursor-not-allowed";
-
-  const handleArrowClick = () => {
-    setActiveForm(null);
-  };
+  const canAddCard = frontInput && backInput;
+  const canGenerate = filteredCards.length > 0;
 
   return (
-    <div className="flex flex-col items-center px-4 sm:px-10 md:px-14">
+    <div className="flex flex-col gap-6 px-4 sm:px-10 py-6 bg-slate-900 min-h-full text-slate-100">
       {loading && <LoadingModal progress={progress} />}
-      <div className="flex w-full justify-between items-center mb-4">
-        <button>
-          <FaArrowLeft onClick={handleArrowClick} />
+      {isModalOpen && (
+        <PreviewModal filteredCards={filteredCards} onClose={closeModal} />
+      )}
+
+      {/* header */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setActiveForm(null)}
+          className="p-2 rounded-xl border border-slate-700 text-slate-400 hover:border-indigo-500 hover:text-indigo-300 transition-all duration-200 cursor-pointer"
+        >
+          <FaArrowLeft size={14} />
         </button>
-        <h2 className="text-3xl font-semibold mb-4 pr-20 mx-auto pt-2 text-center">
-          Nome do Deck: {deckName}
-        </h2>
+        <div>
+          <p className="text-xs text-slate-500 uppercase tracking-widest">
+            Deck
+          </p>
+          <p className="text-base font-semibold text-slate-100 truncate max-w-[220px]">
+            {deckName || "Sem nome"}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col w-full space-y-6 pt-10">
+      {/* deck name input */}
+      <div className="flex flex-col gap-1.5">
+        <Label>Nome do Deck</Label>
         <input
           type="text"
-          placeholder="Nome do Deck Aqui"
+          placeholder="Nome do deck..."
           onChange={(e) => setDeckName(e.target.value)}
-          className="w-full sm:w-[50%] h-12 text-center self-center font-inter placeholder:text-gray-400 placeholder:shadow-3d border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition-all duration-300"
+          className="
+            rounded-xl border border-slate-700 bg-slate-800/60
+            px-4 py-3 text-sm text-slate-100 placeholder-slate-500
+            focus:outline-none focus:ring-2 focus:ring-indigo-500
+            transition-all duration-200
+          "
         />
+      </div>
 
-        <div className="space-y-4">
-          {/* Input de Frente */}
-          <div>
-            <label className="text-lg font-semibold text-gray-700">
-              Frente
-            </label>
-            <textarea
-              className="w-full h-56 p-2 bg-white text-gray-800 rounded-md border border-green-500 focus:outline-none focus:border-green-700 transition-all duration-300"
-              value={frontInput}
-              onChange={(e) => setFrontInput(e.target.value)}
-              placeholder="Coloque a pergunta aqui..."
-            ></textarea>
-          </div>
-
-          {/* Input de Verso */}
-          <div>
-            <label className="text-lg font-semibold text-gray-700">Verso</label>
-            <textarea
-              className="w-full h-56 p-2 bg-white text-gray-800 rounded-md border border-green-500 focus:outline-none focus:border-green-700 transition-all duration-300"
-              value={backInput}
-              onChange={(e) => setBackInput(e.target.value)}
-              placeholder="Coloque a resposta aqui..."
-            ></textarea>
-          </div>
+      {/* front / back */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label>Frente</Label>
+          <Textarea
+            value={frontInput}
+            onChange={(e) => setFrontInput(e.target.value)}
+            placeholder="Coloque a pergunta aqui..."
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label>Verso</Label>
+          <Textarea
+            value={backInput}
+            onChange={(e) => setBackInput(e.target.value)}
+            placeholder="Coloque a resposta aqui..."
+          />
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mt-5 justify-center w-full max-w-screen-sm mb-5">
-        <button
-          className={`w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-            isGenerateButtonDisabled ? disabledClass : ""
-          }`}
-          onClick={handleFileUpload}
-          disabled={isGenerateButtonDisabled}
-        >
-          {loading ? "Gerando..." : "Gerar Deck"}
-        </button>
-        <button
-          className={`w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-300 ${
-            isAddCardButtonDisabled ? disabledClass : ""
-          }`}
-          onClick={handleAddCard}
-          disabled={isAddCardButtonDisabled}
-        >
-          Adicionar ao Deck
-        </button>
-        <button
-          onClick={openModal}
-          className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300"
-        >
-          Pré visualização
-        </button>
+      {/* actions */}
+      <div className="flex flex-wrap gap-3">
+        <Btn onClick={handleAddCard} disabled={!canAddCard}>
+          + Adicionar ao Deck
+        </Btn>
+        <Btn onClick={handleFileUpload} disabled={!canGenerate}>
+          {loading ? "Gerando…" : "Gerar Deck"}
+        </Btn>
+        <Btn onClick={openModal} variant="ghost">
+          📚 Pré-visualização{" "}
+          {filteredCards.length > 0 && `(${filteredCards.length})`}
+        </Btn>
       </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-10 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h1 className="text-2xl font-bold text-center mb-4 text-gray-800">
-              Pré visualização
-            </h1>
-
-            <AnkiCardCarousel filteredCards={filteredCards} />
-
-            <button
-              onClick={closeModal}
-              className="w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-300"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

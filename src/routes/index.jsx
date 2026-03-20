@@ -1,17 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 
 import { CreatedDackPage } from "../pages/CreatedDackPage";
-import { HomePage } from "./Home";
+import HomePage from "../components/home";
 
 export const AppRoutes = () => {
-  // const { cards } = UseDeck();
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   if (cards.length > 0) {
-  //     navigate("/createdDeck");
-  //   }
-  // }, [cards, navigate]);
 
   return (
     <Routes>

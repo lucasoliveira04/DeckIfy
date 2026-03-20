@@ -1,151 +1,187 @@
-import React, { useState, useEffect } from "react";
-import { UseDeck } from "../hook/useDeck";
+// ModalIA.jsx
+
+import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import axios from "axios";
+import { UseDeck } from "../hook/useDeck";
+
+const MAX_CARDS = 20;
+const API_URL = "https://api-dackify-ia-1.onrender.com/api/generate_quests";
 
 const ModalIA = ({ isOpen, closeModal }) => {
   const { addMultipleCards } = UseDeck();
   const [contexto, setContexto] = useState("");
-  const [quantityCards, setQuantityCards] = useState(1);
+  const [quantityCards, setQuantityCards] = useState(5);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const maxCards = 20;
-
+  // ESC to close
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        closeModal();
-      }
+    if (!isOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") closeModal();
     };
-
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    } else {
-      window.removeEventListener("keydown", handleKeyDown);
-    }
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, closeModal]);
+
+  // reset state when reopened
+  useEffect(() => {
+    if (isOpen) {
+      setContexto("");
+      setQuantityCards(5);
+      setError("");
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleContextoChange = (e) => {
-    setContexto(e.target.value);
-  };
-
   const handleQuantityChange = (e) => {
-    let value = Math.max(1, e.target.value);
-    value = Math.min(maxCards, value);
-    setQuantityCards(value);
+    setQuantityCards(Math.min(MAX_CARDS, Math.max(1, Number(e.target.value))));
   };
 
   const handleGenerate = async () => {
     if (!contexto.trim()) {
-      alert("Por favor, insira um contexto para gerar os cartões.");
+      setError("Insira um contexto antes de gerar.");
       return;
     }
-
+    setError("");
     setLoading(true);
-
     try {
-      const response = await axios.post(
-        "https://api-dackify-ia-1.onrender.com/api/generate_quests",
-        {
-          context: contexto,
-          quantidade_tasks: quantityCards,
-        }
-      );
+      const { data } = await axios.post(API_URL, {
+        context: contexto,
+        quantidade_tasks: quantityCards,
+      });
 
-      if (response.data.message === "Ok") {
-        addMultipleCards(response.data.flashcards);
+      if (data.message === "Ok") {
+        addMultipleCards(data.flashcards);
+        closeModal();
       } else {
-        alert("Falha ao gerar cartões. Tente novamente.");
+        setError("Falha ao gerar cartões. Tente novamente.");
       }
-    } catch (error) {
-      console.error("Erro ao gerar cartões:", error);
-      alert("Falha ao gerar cartões. Verifique sua conexão.");
+    } catch {
+      setError("Falha ao gerar cartões. Verifique sua conexão.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    closeModal();
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex justify-center items-center p-6 z-50">
-      <div className="bg-white p-6 rounded-2xl shadow-lg w-[400px] relative animate-slideIn border border-blue-300">
-        {/* Botão de Fechar */}
+    /* backdrop */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal();
+      }}
+    >
+      {/* panel */}
+      <div
+        className="
+        relative w-full max-w-md
+        rounded-2xl border border-slate-700 bg-slate-900
+        p-6 shadow-2xl shadow-black/40
+        animate-[fadeSlideUp_0.2s_ease-out]
+      "
+      >
+        {/* close button */}
         <button
           onClick={closeModal}
-          className="absolute top-3 right-3 text-gray-600 hover:text-blue-500 transition"
           aria-label="Fechar"
+          className="
+            absolute top-4 right-4
+            p-1.5 rounded-lg text-slate-500
+            hover:text-slate-200 hover:bg-slate-800
+            transition-all duration-150
+          "
         >
-          <FaTimes className="text-lg" />
+          <FaTimes size={14} />
         </button>
 
-        {/* Título */}
-        <h2 className="text-xl font-semibold text-blue-500">
-          Gerar Cartões 🤖
-        </h2>
-        <p className="text-gray-600 text-sm mt-1">
-          Digite um contexto e gere flashcards rapidamente.
-        </p>
-
-        {/* Campo de Contexto */}
-        <div className="mt-4">
-          <textarea
-            id="contexto"
-            value={contexto}
-            onChange={handleContextoChange}
-            className="w-full h-24 p-2 bg-blue-50 text-gray-800 rounded-md border border-blue-300 focus:ring-2 focus:ring-blue-400 transition resize-none"
-            placeholder="Digite um resumo do conteúdo..."
-          />
-          <p className="text-gray-600 text-sm mt-2">
-            Exemplo:{" "}
-            <span className="text-blue-500">
-              "A Revolução Francesa foi um movimento social e político que
-              ocorreu entre 1789 e 1799..."
-            </span>
+        {/* heading */}
+        <div className="mb-5">
+          <p className="text-xs font-semibold tracking-widest uppercase text-indigo-400 mb-1">
+            Inteligência Artificial
+          </p>
+          <h2 className="text-xl font-bold text-slate-100">Gerar Cartões 🤖</h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Descreva o conteúdo e a IA cria os flashcards para você.
           </p>
         </div>
 
-        {/* Quantidade de Cartões */}
-        <div className="mt-3">
-          <input
-            type="number"
-            id="quantityCards"
-            value={quantityCards}
-            onChange={handleQuantityChange}
-            min="1"
-            max={maxCards}
-            inputMode="numeric"
-            className="w-full p-2 bg-blue-50 text-gray-800 rounded-md border border-blue-300 focus:ring-2 focus:ring-blue-400 transition"
-            placeholder="Quantos cartões?"
-          />
-
-          <label className="font-bold text-gray-950">
-            Você só pode criar {maxCards} cartões de uma vez
-            <hr />
+        {/* context */}
+        <div className="flex flex-col gap-1.5 mb-4">
+          <label className="text-xs font-semibold tracking-widest uppercase text-slate-400">
+            Contexto
           </label>
+          <textarea
+            rows={4}
+            value={contexto}
+            onChange={(e) => setContexto(e.target.value)}
+            placeholder='Ex: "A Revolução Francesa foi um movimento social e político entre 1789 e 1799..."'
+            className="
+              w-full resize-none rounded-xl border border-slate-700 bg-slate-800/60
+              px-4 py-3 text-sm text-slate-100 placeholder-slate-500
+              focus:outline-none focus:ring-2 focus:ring-indigo-500
+              transition-all duration-200
+            "
+          />
         </div>
 
-        <div className="flex justify-between mt-4">
+        {/* quantity */}
+        <div className="flex flex-col gap-1.5 mb-5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold tracking-widest uppercase text-slate-400">
+              Quantidade de Cartões
+            </label>
+            <span className="text-xs text-slate-500">máx. {MAX_CARDS}</span>
+          </div>
+          <input
+            type="number"
+            value={quantityCards}
+            onChange={handleQuantityChange}
+            min={1}
+            max={MAX_CARDS}
+            inputMode="numeric"
+            className="
+              rounded-xl border border-slate-700 bg-slate-800/60
+              px-4 py-3 text-sm text-slate-100
+              focus:outline-none focus:ring-2 focus:ring-indigo-500
+              transition-all duration-200
+            "
+          />
+        </div>
+
+        {/* inline error */}
+        {error && (
+          <p className="mb-4 rounded-xl bg-red-900/30 border border-red-700/50 px-4 py-2.5 text-sm text-red-400">
+            {error}
+          </p>
+        )}
+
+        {/* actions */}
+        <div className="flex gap-3">
           <button
             onClick={handleGenerate}
-            className={`px-4 py-2 rounded-md text-white transition duration-300 cursor-pointer ${
-              loading
-                ? "bg-blue-300 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
             disabled={loading}
+            className="
+              flex-1 rounded-xl bg-indigo-600 py-3
+              text-sm font-semibold text-white
+              hover:bg-indigo-500 active:scale-95
+              disabled:opacity-50 disabled:cursor-not-allowed
+              transition-all duration-200
+            "
           >
-            {loading ? "Gerando..." : "Gerar"}
+            {loading ? "Gerando…" : "Gerar cartões"}
           </button>
-
           <button
             onClick={closeModal}
-            className="px-4 py-2 bg-red-700 text-white rounded-md hover:bg-red-900 transition cursor-pointer"
+            className="
+              px-5 rounded-xl border border-slate-700 text-slate-400
+              hover:border-slate-500 hover:text-slate-200
+              active:scale-95 transition-all duration-200
+            "
           >
-            Fechar
+            Cancelar
           </button>
         </div>
       </div>

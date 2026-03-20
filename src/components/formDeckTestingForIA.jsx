@@ -1,211 +1,229 @@
-import { FaArrowLeft } from "react-icons/fa";
-import { useAnkiCardGenerator } from "../hook/useAnkiCardGenerator";
-import { useCardGeneration } from "../hook/useCardGenerationAI";
-import { UseDeck } from "../hook/useDeck";
+// FormDeckWithIA.jsx
+
 import { useEffect, useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
 import axios from "axios";
+import { useAnkiCardGenerator } from "../hook/useAnkiCardGenerator";
+import { UseDeck } from "../hook/useDeck";
 import { AlertMessage } from "./alertMessage";
 import AnkiCardCarousel from "./AnkiCardCarousel";
 import LoadingModal from "./loadingPage";
 
+/* ─── shared primitives (same as FormForTestingNotIA) ────────────── */
+const Label = ({ children }) => (
+  <label className="text-xs font-semibold tracking-widest uppercase text-slate-400">
+    {children}
+  </label>
+);
+
+const Btn = ({ onClick, disabled, variant = "primary", children }) => {
+  const base =
+    "px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-95 cursor-pointer";
+  const variants = {
+    primary:
+      "bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed",
+    ghost:
+      "border border-slate-700 text-slate-300 hover:border-indigo-500 hover:text-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed",
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`${base} ${variants[variant]}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+const PreviewModal = ({ filteredCards, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="relative w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <h2 className="mb-4 text-center text-lg font-bold text-slate-100">
+        Pré-visualização
+      </h2>
+      <AnkiCardCarousel filteredCards={filteredCards} />
+      <button
+        onClick={onClose}
+        className="mt-4 w-full rounded-xl bg-red-600/80 py-2.5 text-sm font-semibold text-white hover:bg-red-500 transition-all duration-200"
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+);
+
+/* ─── constants ──────────────────────────────────────────────────── */
+const MAX_CARDS = 20;
+const API_URL = "https://api-dackify-ia-1.onrender.com/api/generate_quests";
+
+/* ─── component ─────────────────────────────────────────────────── */
 export const FormDeckWithIA = ({ setActiveForm }) => {
   const { addMultipleCards } = UseDeck();
-  const [contexto, setContexto] = useState("");
-  const [quantityCards, setQuantityCards] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState({ message: "", typeMessage: "" });
-
   const {
     deckName,
     setDeckName,
-    frontInput,
-    setFrontInput,
-    backInput,
-    setBackInput,
     filteredCards,
     handleFileUpload,
-    handleAddCard,
-    removeAllCard,
     loading: loadingGenerator,
     progress,
-    alert,
     isModalOpen,
     openModal,
     closeModal,
-    searchQuery,
-    setSearchQuery,
   } = useAnkiCardGenerator();
 
-  const handleArrowClick = () => {
-    setActiveForm(null);
-  };
+  const [contexto, setContexto] = useState("");
+  const [quantityCards, setQuantityCards] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(null); // { message, typeMessage }
 
-  const maxCards = 20;
-
-  const handleContextoChange = (e) => {
-    setContexto(e.target.value);
-  };
+  // auto-dismiss alert
+  useEffect(() => {
+    if (!alert) return;
+    const id = setTimeout(() => setAlert(null), 5000);
+    return () => clearTimeout(id);
+  }, [alert]);
 
   const handleQuantityChange = (e) => {
-    let value = Math.max(1, e.target.value);
-    value = Math.min(maxCards, value);
-    setQuantityCards(value);
+    const v = Math.min(MAX_CARDS, Math.max(1, Number(e.target.value)));
+    setQuantityCards(v);
   };
 
   const handleGenerate = async () => {
     if (!contexto.trim()) {
-      setShowAlert(true);
-      setAlertType({ message: "Erro", typeMessage: "error" });
+      setAlert({
+        message: "Adicione um contexto antes de gerar.",
+        typeMessage: "error",
+      });
       return;
     }
 
-    setShowAlert(false);
     setLoading(true);
-
     try {
-      const response = await axios.post(
-        "https://api-dackify-ia-1.onrender.com/api/generate_quests",
-        {
-          context: contexto,
-          quantidade_tasks: quantityCards,
-        }
-      );
+      const { data } = await axios.post(API_URL, {
+        context: contexto,
+        quantidade_tasks: quantityCards,
+      });
 
-      if (response.data.message === "Ok") {
-        setShowAlert(true);
-        setAlertType({ message: "Funciona", typeMessage: "success" });
-        addMultipleCards(response.data.flashcards);
+      if (data.message === "Ok") {
+        addMultipleCards(data.flashcards);
+        setAlert({
+          message: "Cartões gerados com sucesso!",
+          typeMessage: "success",
+        });
       } else {
-        alert("Falha ao gerar cartões. Tente novamente.");
+        setAlert({
+          message: "Falha ao gerar cartões. Tente novamente.",
+          typeMessage: "error",
+        });
       }
-    } catch (error) {
-      console.error("Erro ao gerar cartões:", error);
-      alert("Falha ao gerar cartões. Verifique sua conexão.");
+    } catch {
+      setAlert({
+        message: "Falha ao gerar cartões. Verifique sua conexão.",
+        typeMessage: "error",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    closeModal();
   };
 
-  useEffect(() => {
-    if (showAlert) {
-      const timer = setTimeout(() => {
-        setShowAlert(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [showAlert]);
-
-  const isGenerateButtonDisabled = filteredCards.length === 0;
-  const isGenertedTaskIA = !contexto;
-  const disabledClass = "opacity-50 cursor-not-allowed";
+  const canGenerate = filteredCards.length > 0;
 
   return (
-    <div className="flex flex-col items-center px-14">
-      {loading && <LoadingModal progress={progress} />}
-      {showAlert && (
-        <AlertMessage
-          message={alertType.message}
-          typeMessage={alertType.typeMessage}
-        />
+    <div className="flex flex-col gap-6 px-4 sm:px-10 py-6 bg-slate-900 min-h-full text-slate-100">
+      {(loading || loadingGenerator) && <LoadingModal progress={progress} />}
+      {alert && (
+        <AlertMessage message={alert.message} typeMessage={alert.typeMessage} />
+      )}
+      {isModalOpen && (
+        <PreviewModal filteredCards={filteredCards} onClose={closeModal} />
       )}
 
-      <div className="flex w-full justify-between items-center">
-        <button>
-          <FaArrowLeft onClick={handleArrowClick} />
+      {/* header */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setActiveForm(null)}
+          className="p-2 rounded-xl border border-slate-700 text-slate-400 hover:border-indigo-500 hover:text-indigo-300 transition-all duration-200 cursor-pointer"
+        >
+          <FaArrowLeft size={14} />
         </button>
-
-        <div className="flex flex-col">
-          <h2 className="text-3xl font-semibold mb-8 pr-36 mx-auto pt-2 overflow-hidden">
-            Nome do Deck: {deckName}
-          </h2>
+        <div>
+          <p className="text-xs text-slate-500 uppercase tracking-widest">
+            Deck
+          </p>
+          <p className="text-base font-semibold text-slate-100 truncate max-w-[220px]">
+            {deckName || "Sem nome"}
+          </p>
         </div>
       </div>
 
-      {/* Titulo */}
-      <div className="flex flex-col w-full space-y-6 pt-10">
-        <div className="flex flex-row w-full gap-10">
+      {/* deck name + quantity */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-1.5 flex-1">
+          <Label>Nome do Deck</Label>
           <input
             type="text"
-            placeholder="Nome do Deck Aqui"
+            placeholder="Nome do deck..."
             onChange={(e) => setDeckName(e.target.value)}
-            className="w-[90%] h-12 text-center self-center font-inter placeholder:text-gray-400 placeholder:shadow-3d border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 transition-all duration-300"
+            className="
+              rounded-xl border border-slate-700 bg-slate-800/60
+              px-4 py-3 text-sm text-slate-100 placeholder-slate-500
+              focus:outline-none focus:ring-2 focus:ring-indigo-500
+              transition-all duration-200
+            "
           />
-
-          <div className="flex flex-col mb-6 w-full">
-            <label htmlFor="quantityCards" className="text-sm text-gray-600">
-              Quantidade de Cartões
-            </label>
-            <input
-              type="number"
-              id="quantityCards"
-              value={quantityCards}
-              onChange={handleQuantityChange}
-              min={1}
-              inputMode="numeric"
-              className="w-[20%] p-2 bg-blue-50 text-gray-800 rounded-md border border-blue-300 focus:ring-2 focus:ring-blue-400 transition"
-            />
-          </div>
         </div>
 
-        <div className="flex justify-between gap-3">
-          <textarea
-            id="contexto"
-            onChange={handleContextoChange}
-            className="w-full h-44 p-2 bg-white text-gray-800 rounded-md border border-green-500 focus:outline-none focus:border-green-700 transition-all duration-300"
-            placeholder="Digite um resumo do conteúdo..."
+        <div className="flex flex-col gap-1.5 w-full sm:w-36">
+          <Label>Qtd. de Cartões</Label>
+          <input
+            type="number"
+            value={quantityCards}
+            onChange={handleQuantityChange}
+            min={1}
+            max={MAX_CARDS}
+            className="
+              rounded-xl border border-slate-700 bg-slate-800/60
+              px-4 py-3 text-sm text-slate-100
+              focus:outline-none focus:ring-2 focus:ring-indigo-500
+              transition-all duration-200
+            "
           />
         </div>
       </div>
-      <div className="flex flex-col justify-center items-center mt-5 gap-10">
-        <button
-          className={`w-44 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-            isGenertedTaskIA ? disabledClass : ""
-          }`}
-          onClick={handleGenerate}
-          disabled={isGenertedTaskIA}
+
+      {/* context textarea */}
+      <div className="flex flex-col gap-1.5">
+        <Label>Contexto</Label>
+        <textarea
+          rows={6}
+          value={contexto}
+          onChange={(e) => setContexto(e.target.value)}
+          placeholder="Digite um resumo do conteúdo para a IA gerar os cartões..."
+          className="
+            w-full resize-none rounded-xl border border-slate-700 bg-slate-800/60
+            px-4 py-3 text-sm text-slate-100 placeholder-slate-500
+            focus:outline-none focus:ring-2 focus:ring-indigo-500
+            transition-all duration-200
+          "
+        />
+      </div>
+
+      {/* actions */}
+      <div className="flex flex-wrap gap-3">
+        <Btn onClick={handleGenerate} disabled={!contexto.trim() || loading}>
+          {loading ? "Gerando…" : "🤖 Gerar perguntas"}
+        </Btn>
+        <Btn
+          onClick={handleFileUpload}
+          disabled={!canGenerate || loadingGenerator}
         >
-          Gerar perguntas
-        </button>
-
-        <div className="flex gap-2">
-          <button
-            className={`px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 ${
-              isGenerateButtonDisabled ? disabledClass : ""
-            }`}
-            onClick={handleFileUpload}
-            disabled={isGenerateButtonDisabled}
-          >
-            {loading ? "Gerando..." : "Gerar Deck"}
-          </button>
-
-          <button
-            onClick={openModal}
-            className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-300"
-          >
-            Pré visualização
-          </button>
-        </div>
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-10 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h1 className="text-2xl font-bold text-center mb-4 text-gray-800">
-                Pré visualização
-              </h1>
-
-              <AnkiCardCarousel filteredCards={filteredCards} />
-
-              <button
-                onClick={closeModal}
-                className="w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-300"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        )}
+          {loadingGenerator ? "Gerando…" : "Gerar Deck"}
+        </Btn>
+        <Btn onClick={openModal} variant="ghost">
+          📚 Pré-visualização{" "}
+          {filteredCards.length > 0 && `(${filteredCards.length})`}
+        </Btn>
       </div>
     </div>
   );
